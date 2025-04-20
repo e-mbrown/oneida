@@ -1,10 +1,6 @@
 import iconLinks from "@/assets/asset";
 import React, { JSX, useEffect, useState } from "react";
-// import {
-//     Popover,
-//     PopoverContent,
-//     PopoverTrigger,
-//   } from "@/components/ui/popover"
+import places  from '@/data/places.json'
 
 import {
     Sheet,
@@ -54,11 +50,13 @@ const Icons: React.FC<IconComp> =
     useEffect(() => {
         // console.log(curr)
     }, [curr])
-    async function  getBlurb(call: string):Promise<void>{
-        const res = await fetch(`http://localhost:8000/blurb/${call}`, {
-        })
-        const data = await res.json()
-        setCurr(data.data)
+     function  getBlurb(call: string) {
+        for (let i = 0; i < places.length; i++){
+            if (places[i].call_name == call){
+                setCurr(places[i])
+                return
+            }
+        }
     }
 
 

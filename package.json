@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "serve": "tsx --watch ./db.ts",
+    "prebuild": "node db.js",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "predeploy": "npm run build",
+    "predeploy": "npm run prebuild && npm run build",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
