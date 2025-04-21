@@ -14,10 +14,12 @@ import {
   
   
 
-interface IconComp {
-    imgBounds: {x: number, y: number}
+export interface IconComp {
+    imgBounds: Point
+    adjust?: Point
+    zScale?: number
 }
-type Point = {
+export type Point = {
     x: number,
     y: number,
 }
@@ -25,6 +27,7 @@ type Point = {
 type IconObj = {
     name: string
     pos: Point,
+    adjust?: Point,
 }
 
 const iconData: Array<IconObj> =[
@@ -44,12 +47,12 @@ type ResType = {
 }
 
 const Icons: React.FC<IconComp> = 
-({imgBounds}) => {
+({imgBounds, adjust, zScale}) => {
     const [curr, setCurr] = useState<ResType | null> (null)
 
     useEffect(() => {
-        // console.log(curr)
-    }, [curr])
+    }, [adjust])
+
      function  getBlurb(call: string) {
         for (let i = 0; i < places.length; i++){
             if (places[i].call_name == call){
@@ -62,14 +65,24 @@ const Icons: React.FC<IconComp> =
 
     let icons: JSX.Element[] = []
     icons = iconData.map(i => {
+        let offset: Point = {x:0, y:0}
+        let zoom = 1
+        if(adjust){
+            offset = adjust
+        }        
+        if(zScale){
+            zoom = zScale
+        }     
+        
        return <div
-       className="absolute !p-0"
+       className="absolute !p-0 transform-transition duration-300 ease"
        key={i.name}
        style={{
-        left: `${(i.pos.x)*imgBounds.x}px`,
-        top: `${(i.pos.y)* imgBounds.y}px`,
+        transformOrigin: "top left",
+        left: `${i.pos.x*imgBounds.x * zoom}px`,
+        top: `${i.pos.y * imgBounds.y * zoom}px`,
         zIndex: 1,
-        transform: 'translate(-50%, -50%) ease',
+        transform: `translate(${offset?.x}px, ${offset?.y}px)`,
     }}>
         <SheetTrigger className="" style={{
             background:"transparent"

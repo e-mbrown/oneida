@@ -1,21 +1,17 @@
 import oneida from '@/assets/oneida.svg'
 import React, { useEffect, useState, useRef} from 'react'
-import Icons from '@/components/custom/icons'
+import Icons, { IconComp, Point} from '@/components/custom/icons'
 
 const originalSvg = {width: 10670, height: 5714}
 const Map: React.FC = function() {
-    // const [scale, setScale] = useState(1)
+    const [zScale, setzScale] = useState(1)
     const [pos, setPos] = useState({x: 0, y: 0})
     const [startPos, setStartPos] = useState({x: 1, y: 1})
     const [drag, setDrag] = useState(false)
     const [divS, setdivS] = useState<{x: number, y: number}>({x:1,y:1})
-    const [scale, setScale] = useState<{x: number, y: number}>({x:1,y:1})
+    const [scale, setScale] = useState<IconComp>({imgBounds: {x:1,y:1} as Point})
     const image = useRef<HTMLImageElement | null >(null);
     const overlay = useRef<HTMLDivElement | null >(null);
-
-    // const zoomIn = () => setScale((prev) => Math.min(prev + 0.2, 3))
-    // const zoomOut = () => setScale((prev) => Math.max(prev - 0.2,1))
-    // const reset = () => setScale(1)
 
     useEffect(()=> {
         const img = image.current
@@ -24,11 +20,14 @@ const Map: React.FC = function() {
         if (!img || !ovlay) return
 
         const updateScale = () => {
-            if (scale.x != img.clientWidth/originalSvg.width){
-                setScale({
+            if (scale.imgBounds.x != img.clientWidth/originalSvg.width){
+                const scaleChg = scale
+                scaleChg.imgBounds = {
                     x: img.clientWidth / originalSvg.width,
                     y: img.clientHeight / originalSvg.height,
-                })
+                }
+
+                setScale(scaleChg)
             }
             if (divS.x != img.clientWidth){
                 setdivS({
@@ -48,6 +47,21 @@ const Map: React.FC = function() {
         }
     },[scale, divS])
 
+    const handleZoom = (e: React.WheelEvent) => {
+        e.preventDefault()
+        const zoom = 0.1
+        const newzScale = Math.min(Math.max(0.5, zScale-e.deltaY * zoom *0.01), 5)
+
+        setzScale(newzScale)
+
+        if (image.current){console.log({
+            scale: zScale,
+            newheight: {x:image.current?.clientWidth*zScale, y: image.current?.clientHeight * zScale},
+            newX: 3455 * zScale,
+            scaleX: 3455 * zScale *scale.imgBounds.x,
+        })}
+        
+    }
     const initDrag = (e: React.MouseEvent) => {
         e.preventDefault()
         setDrag(true);
@@ -60,6 +74,9 @@ const Map: React.FC = function() {
             x: (e.clientX - startPos.x),
             y: (e.clientY - startPos.y)
         })
+        const iconMvmt = scale
+        iconMvmt.adjust = pos
+        setScale(iconMvmt)
     }
 
 
@@ -69,6 +86,7 @@ const Map: React.FC = function() {
             <div className='flex w-[65dvw] h-auto border cursor-grab active:cursor-grabbing relative
             justify-center items-center overflow-visible min-w-150'
                 draggable="true"
+                onWheel={handleZoom}
                 onMouseDown={initDrag}
                 onMouseMove={onDrag}
                 onMouseLeave={endDrag}
@@ -80,10 +98,10 @@ const Map: React.FC = function() {
                     alt="Pannable Map of Oneida lake."
                     className='block h-auto absolute transform-transition duration-300 ease'
                     style={{
-                        transform: `translate(${pos.x}px, ${pos.y}px)`,
+                        transform: `translate(${pos.x}px, ${pos.y}px) scale(${zScale})`,
                     }}
                     onLoad={() => {
-                        const event = new Event('resze')
+                        const event = new Event('resize')
                         window.dispatchEvent(event)
                     }}
                 />
@@ -96,7 +114,7 @@ const Map: React.FC = function() {
                     }}
                 >
                     {scale &&
-                    <Icons imgBounds = {scale}/>
+                    <Icons imgBounds = {scale.imgBounds} adjust={scale.adjust} zScale={zScale}/>
                 } 
                 </div> 
             </div>

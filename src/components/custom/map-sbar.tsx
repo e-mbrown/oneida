@@ -23,7 +23,7 @@ import {
       // icon:
     },
     {
-      title: "Tree markers",
+      title: "Bay markers",
       url: "#",
       // icon:
     },
