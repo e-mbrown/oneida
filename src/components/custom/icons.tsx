@@ -1,5 +1,5 @@
 import iconLinks from "@/assets/asset";
-import React, { JSX, useEffect, useState } from "react";
+import React, { JSX, useState } from "react";
 import places  from '@/data/places.json'
 
 import {
@@ -9,13 +9,11 @@ import {
     SheetHeader,
     SheetTitle,
     SheetTrigger,
-    // SheetTrigger,
-  } from "@/components/ui/sheet"
-  
+  } from "@/components/ui/sheet"  
   
 
 export interface IconComp {
-    imgBounds: Point
+    imgBounds?: Point
     adjust?: Point
     zScale?: number
 }
@@ -31,64 +29,56 @@ type IconObj = {
 }
 
 const iconData: Array<IconObj> =[
-    {name: "maple_bay", pos: {x:3455, y:210}},
-    {name: "sturgeon", pos: {x:5345, y:280}},
-    {name: "billington_bay", pos: {x:4635, y:480}},
-    {name: "oneida_river", pos: {x:150, y:-1620}},
-    {name: "muskrat_bay", pos: {x:1250, y:-1120}},
-    // Make custom size
-    {name: "big_bay", pos: {x:800, y:-1920}},
+    {name: "maple_bay", pos: {x:32.5, y:53.5}},
+    {name: "sturgeon", pos: {x:52, y:56}},
+    {name: "billington_bay", pos: {x:43, y:57}},
+    {name: "oneida_river", pos: {x:1.5, y:20.5}},
+    {name: "muskrat_bay", pos: {x:15, y:31}},
+    // // Make custom size
+    {name: "big_bay", pos: {x:7, y:17}},
 ]
 
 type ResType = {
    title: string,
    desc: string,
-   call_name: string 
+   img: string
 }
 
 const Icons: React.FC<IconComp> = 
-({imgBounds, adjust, zScale}) => {
+() => {
     const [curr, setCurr] = useState<ResType | null> (null)
-
-    useEffect(() => {
-    }, [adjust])
 
      function  getBlurb(call: string) {
         for (let i = 0; i < places.length; i++){
             if (places[i].call_name == call){
-                setCurr(places[i])
+                const res = {
+                    title:places[i].title,
+                    desc: places[i].desc,
+                    img: iconLinks[places[i].call_name]
+                } as ResType
+                setCurr(res)
                 return
             }
         }
     }
 
-
     let icons: JSX.Element[] = []
     icons = iconData.map(i => {
-        let offset: Point = {x:0, y:0}
-        let zoom = 1
-        if(adjust){
-            offset = adjust
-        }        
-        if(zScale){
-            zoom = zScale
-        }     
-        
        return <div
-       className="absolute !p-0 transform-transition duration-300 ease"
+       className="absolute !p-0"
        key={i.name}
        style={{
-        transformOrigin: "top left",
-        left: `${i.pos.x*imgBounds.x * zoom}px`,
-        top: `${i.pos.y * imgBounds.y * zoom}px`,
-        zIndex: 1,
-        transform: `translate(${offset?.x}px, ${offset?.y}px)`,
+        left: `${i.pos.x}%`,
+        top:  `${i.pos.y}%`,
+        transform: `translate(-50%, -50%px)`,
     }}>
-        <SheetTrigger className="" style={{
-            background:"transparent"
+        <SheetTrigger style={{
+            background:"transparent",
+            padding: "0"
+            
         }}>
             <img
-            className="size-10 p-0"
+            className="size-8"
             src={iconLinks[i.name]}
             alt={i.name}
             onClick={() => getBlurb(i.name)}
@@ -100,18 +90,11 @@ const Icons: React.FC<IconComp> =
 
     return(
         <>
-        {/* <Popover>
-            <PopoverTrigger>
-                {icons}
-            </PopoverTrigger>
-            <PopoverContent>
-                {curr?.desc}
-            </PopoverContent>
-        </Popover> */}
     <Sheet>
         {icons}
             <SheetContent>
                 <SheetHeader>
+                    <img src={curr?.img} alt={curr?.title} />
                     <SheetTitle>{curr?.title}</SheetTitle>
                     <SheetDescription>{curr?.desc}</SheetDescription>
                 </SheetHeader>
